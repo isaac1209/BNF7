@@ -1,0 +1,3 @@
+C:/Users/amthe/CLionProjects/BNF7/cmake-build-debug/CMakeFiles/BNF7.dir
+C:/Users/amthe/CLionProjects/BNF7/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/amthe/CLionProjects/BNF7/cmake-build-debug/CMakeFiles/rebuild_cache.dir

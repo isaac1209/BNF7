@@ -1,0 +1,13 @@
+
+match    := expr
+expr     := group | or_op | word[expr] | counter
+group    := (expr)
+word     := char[word]
+char     := any_char | a --> z | A --> Z | digit
+counter  := word{digit}
+any_char := .
+digit    := 0->9[digit]
+or_op    := word + word
+multi    := word*
+ignor    :expr"\I"
+

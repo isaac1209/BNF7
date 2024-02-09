@@ -1,0 +1,4 @@
+C:\Users\amthe\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\233.14015.92\bin\cmake\win\x64\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=C:/Users/amthe/AppData/Local/JetBrains/Toolbox/apps/CLion/ch-0/233.14015.92/bin/ninja/win/x64/ninja.exe -G Ninja -S C:\Users\amthe\CLionProjects\BNF7 -B C:\Users\amthe\CLionProjects\BNF7\cmake-build-debug
+-- Configuring done (0.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: C:/Users/amthe/CLionProjects/BNF7/cmake-build-debug
