@@ -4,6 +4,24 @@
 #include "parser.h"
 #include "lexer.h"
 
+
+multi* multiParser(it first, it last,lexer lexer){
+    auto  word = paserWord(first,last,lexer);
+
+    if(!word){
+        return nullptr;
+    }
+    auto token = lexer.lex(first,last);
+
+    if(token == lexer::MULT_OP){
+        multi* value = new multi;
+        value->add(word);
+
+        return value;
+    }
+
+    return nullptr;
+}
 counter* count(it first, it last,lexer lexer){
 
     counter* counter1 = new counter;
@@ -139,15 +157,20 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
         return expr_node;
     }
 
+    auto multiSymbol = multiParser(first,last,lexer);
+    if(multiSymbol){
+        auto expr_node = new expr_op;
+        expr_node->add(multiSymbol);
+        return expr_node;
+    }
+
     auto text_node = paserWord(first, last, lexer);
     if(text_node){
         auto expr_node = new expr_op;
         expr_node->add(text_node);
-        expr_node->add(parse_expr(first, last,lexer)); // here we have a problem infinity loop
+        expr_node->add(parse_expr(first, last,lexer));
         return expr_node;
     }
-
-
 
     return nullptr;
 }

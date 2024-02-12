@@ -21,11 +21,6 @@ struct char_op:op{
     char ch;
     char_op(char c):ch(c){ }
 
-    /*    std::string program = "I + war";
-     *    std::string input = "war W";
-     *
-     * */
-
         bool eval(it first, it last) override{
 
         if(*first == ch || *first == '.'){
@@ -96,6 +91,20 @@ struct counter: op{
         }
 
         return children[1]->eval(first, last);
+    }
+};
+
+struct multi: op{
+    bool eval(it first, it last) override{
+
+        if(first == last)
+            return false;
+        auto result = children[0]->eval(first, last);
+        if(result){
+            return true;
+        }
+
+        return false;
     }
 };
 

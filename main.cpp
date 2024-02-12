@@ -3,8 +3,12 @@
 #include "lexer.h"
 int main() {
 
-    std::string program = "Waterloo{2}";
-    std::string input = "W Waterloo ";
+    std::string program = "lo* could.{3}";
+    std::string input = "Waterloo I was defeated, you won the war Waterloo promise to"
+                        " love you for ever more Waterloo couldn't escape if I wanted"
+                        " to Waterloo knowing my fate is to be with you Waterloo finally"
+                        " facing my Waterloo ";
+
     lexer lexer(program.begin(),program.end());
     auto tree = match(program.begin(),program.end(),lexer);
 
