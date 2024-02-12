@@ -3,8 +3,8 @@
 #include "lexer.h"
 int main() {
 
-    std::string program = "I + loo";
-    std::string input = "Waterloo W";
+    std::string program = "Waterloo{2}";
+    std::string input = "W Waterloo ";
     lexer lexer(program.begin(),program.end());
     auto tree = match(program.begin(),program.end(),lexer);
 

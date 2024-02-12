@@ -86,10 +86,22 @@ struct expr_op:op{ //
     }
 };
 
+struct counter: op{
+    bool eval(it first, it last) override{
+
+        auto result = children[0]->eval(first, last);
+
+        if(result){
+            return true;
+        }
+
+        return children[1]->eval(first, last);
+    }
+};
+
 struct or_op:op{
     bool eval(it first, it last) override{
         auto result = children[0]->eval(first, last);
-
 
         if(result){
             return true;

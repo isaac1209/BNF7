@@ -4,6 +4,38 @@
 #include "parser.h"
 #include "lexer.h"
 
+counter* count(it first, it last,lexer lexer){
+
+    counter* counter1 = new counter;
+    auto myWord = paserWord(first,last,lexer);
+    if(!myWord){
+        return nullptr;
+    }
+
+    counter1->add(myWord);
+
+    auto value = lexer.lex(first,last);
+    if(value == lexer::OPEN_BRES){
+        ++first;
+
+         value = lexer.lex(first,last);
+        if(value == lexer::DIGIT){
+            auto digit = paserWord(first,last,lexer);
+            counter1->add(digit);
+        }
+
+        value = lexer.lex(first,last);
+        if(value == lexer::CLOSEING_BRES){
+
+            return counter1;
+        }
+
+
+    }
+
+    return nullptr;
+}
+
 or_op* orOp(it first, it last,lexer lexer){
     auto lhs = paserWord(first,last,lexer);
     if(lhs){
@@ -97,6 +129,13 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
     if(or_OP){
         auto expr_node = new expr_op;
         expr_node->add(or_OP);
+        return expr_node;
+    }
+
+    auto counting = count(first,last,lexer);
+    if(counting){
+        auto expr_node = new expr_op;
+        expr_node->add(counting);
         return expr_node;
     }
 
