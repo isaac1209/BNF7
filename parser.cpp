@@ -16,7 +16,6 @@ multi* multiParser(it first, it last,lexer lexer){
     if(token == lexer::MULT_OP){
         multi* value = new multi;
         value->add(word);
-
         return value;
     }
 
@@ -24,13 +23,13 @@ multi* multiParser(it first, it last,lexer lexer){
 }
 counter* count(it first, it last,lexer lexer){
 
-    counter* counter1 = new counter;
+
     auto myWord = paserWord(first,last,lexer);
     if(!myWord){
         return nullptr;
     }
 
-    counter1->add(myWord);
+
 
     auto value = lexer.lex(first,last);
     if(value == lexer::OPEN_BRES){
@@ -38,15 +37,19 @@ counter* count(it first, it last,lexer lexer){
 
          value = lexer.lex(first,last);
         if(value == lexer::DIGIT){
-            auto digit = paserWord(first,last,lexer);
-            counter1->add(digit);
+
+            int x = *first - '0';
+
+            counter* counter1 = new counter(x);
+
+            value = lexer.lex(++first,last);
+            if(value == lexer::CLOSEING_BRES){
+                counter1->add(myWord);
+                return counter1;
+            }
         }
 
-        value = lexer.lex(first,last);
-        if(value == lexer::CLOSEING_BRES){
 
-            return counter1;
-        }
 
 
     }
@@ -99,7 +102,7 @@ word* paserWord(it& first, it last,lexer lexer){
         word* results = new word;
         results->add(ch);
         ++first;
-        results->add(paserWord(first, last,lexer)); // recursive call
+        results->add(paserWord(first, last,lexer));
         return results;
 
     }
@@ -107,6 +110,12 @@ word* paserWord(it& first, it last,lexer lexer){
 }
 group_op* parse_group(it& first, it last,lexer lexer){
     auto value = lexer.lex(first, last);
+    while (value == lexer::SPACE){
+        ++first;
+        value = lexer.lex(first, last);
+    }
+    value = lexer.lex(++first, last);
+
     if(value == lexer::LEFT_PAREN){
         ++first;
         auto text_node = paserWord(first, last,lexer);
@@ -129,14 +138,14 @@ group_op* parse_group(it& first, it last,lexer lexer){
         return group_node;
     }
 
-    // continue with { digit }
+    --first;
     return nullptr;
 }
 
 expr_op* parse_expr(it& first, it last,lexer lexer){
 
     auto group_op = parse_group(first, last,lexer);
-    if(group_op){   // checking if the expression starts with (
+    if(group_op){
         auto expr_node = new expr_op;
         expr_node->add(group_op);
         expr_node->add(parse_expr(first, last,lexer));
@@ -175,8 +184,6 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
     return nullptr;
 }
 
-
-//repetition
 match_op* match(it first, it last, lexer lexer){
     auto  expr_node = parse_expr(first,last,lexer);
     if(expr_node){

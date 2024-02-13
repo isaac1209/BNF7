@@ -9,19 +9,18 @@
 #include "lexer.h"
 
 struct op{
-    virtual bool eval(it first, it last) = 0;
+    virtual bool eval(it first, it last, it& ptr) = 0;
     void add(op* child){
         if(child)
             children.push_back(child);
     }
     std::vector<op*> children;
 };
-
 struct char_op:op{
     char ch;
     char_op(char c):ch(c){ }
 
-        bool eval(it first, it last) override{
+        bool eval(it first, it last,it& ptr) override{
 
         if(*first == ch || *first == '.'){
             return true;
@@ -31,35 +30,51 @@ struct char_op:op{
 
         }
 
-
-};
-
-struct any_op : char_op{
-    bool eval(it first, it last) override{
-        if(first == last){
-            return false;
-        }
-        first++;
-        return true;
-    }
-
 };
 
 struct word : op{
-    bool eval(it first, it last) override{
-        auto result = children[0]->eval(first, last);
+    bool eval(it first, it last,it& ptr) override{
+        auto result = children[0]->eval(first, last,ptr);
+
+        if(first != last){
+            ptr = first;
+        }
+
         if(children.size() > 1){
-            return result && children[1]->eval(first + 1, last);
+            return result && children[1]->eval(++first, last,ptr);
         }
         return result;
     }
 };
 
+struct counter: op{
+    int N = 0;
+    counter(int c):N(c){}
+
+    bool eval(it first, it last,it& ptr) override{
+        auto result = children[0]->eval(first, last,ptr);
+        if(first == last){
+            return false;
+        }
+        if(!result){
+            eval(++first, last,ptr);
+        }
+
+        last = ptr +(N +1); // uppdate the last pointer
+        while (first != last){
+            std::cout<<*first;
+            first++;
+        }
+
+        return result;
+    }
+};
+
 struct group_op:op{ // wrong implementation
-    bool eval(it first, it last) override{
+    bool eval(it first, it last,it& ptr) override{
         if(first == last)
             return false;
-        auto result = children[0]->eval(first, last);
+        auto result = children[0]->eval(first, last,ptr);
         if(result){
             return true;
         }
@@ -69,10 +84,10 @@ struct group_op:op{ // wrong implementation
 };
 
 struct expr_op:op{ //
-    bool eval(it first, it last) override{
+    bool eval(it first, it last,it& ptr) override{
         if(first == last)
             return false;
-        auto result = children[0]->eval(first, last);
+        auto result = children[0]->eval(first, last,ptr);
         if(result){
             return true;
         }
@@ -81,52 +96,53 @@ struct expr_op:op{ //
     }
 };
 
-struct counter: op{
-    bool eval(it first, it last) override{
-
-        auto result = children[0]->eval(first, last);
-
-        if(result){
-            return true;
-        }
-
-        return children[1]->eval(first, last);
-    }
-};
 
 struct multi: op{
-    bool eval(it first, it last) override{
+    int counter=0;
+    bool eval(it first, it last,it& ptr) override{
 
-        if(first == last)
+        if(first == last){
+            std::cout<<counter<<" ";
             return false;
-        auto result = children[0]->eval(first, last);
+        }
+
+        auto result = children[0]->eval(first, last,ptr);
+        if(!result){
+            return eval(first+1, last,ptr);
+        }
         if(result){
+            counter++;
+            eval(first+1, last,ptr);
+        }
+        if(counter){
             return true;
         }
 
         return false;
     }
+
+
 };
 
 struct or_op:op{
-    bool eval(it first, it last) override{
-        auto result = children[0]->eval(first, last);
+    bool eval(it first, it last,it& ptr) override{
+        auto result = children[0]->eval(first, last,ptr);
 
         if(result){
             return true;
         }
 
-        return children[1]->eval(first, last);
+        return children[1]->eval(first, last,ptr);
     }
 };
 
 struct match_op:op{
-    bool eval(it first, it last) override{
+    bool eval(it first, it last,it& ptr) override{
         if(first == last)
             return false;
-        auto result = children[0]->eval(first, last);
+        auto result = children[0]->eval(first, last,ptr);
         if(!result){
-            return eval(first + 1, last);
+            return eval(first + 1, last,ptr);
         }
         return true;
     }
