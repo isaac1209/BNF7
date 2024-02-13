@@ -22,14 +22,10 @@ multi* multiParser(it first, it last,lexer lexer){
     return nullptr;
 }
 counter* count(it first, it last,lexer lexer){
-
-
     auto myWord = paserWord(first,last,lexer);
     if(!myWord){
         return nullptr;
     }
-
-
 
     auto value = lexer.lex(first,last);
     if(value == lexer::OPEN_BRES){
@@ -37,9 +33,7 @@ counter* count(it first, it last,lexer lexer){
 
          value = lexer.lex(first,last);
         if(value == lexer::DIGIT){
-
             int x = *first - '0';
-
             counter* counter1 = new counter(x);
 
             value = lexer.lex(++first,last);
@@ -48,9 +42,6 @@ counter* count(it first, it last,lexer lexer){
                 return counter1;
             }
         }
-
-
-
 
     }
 
@@ -110,10 +101,13 @@ word* paserWord(it& first, it last,lexer lexer){
 }
 group_op* parse_group(it& first, it last,lexer lexer){
     auto value = lexer.lex(first, last);
+    bool space = false;
     while (value == lexer::SPACE){
         ++first;
         value = lexer.lex(first, last);
+        space = true;
     }
+    if(space)
     value = lexer.lex(++first, last);
 
     if(value == lexer::LEFT_PAREN){
@@ -138,7 +132,7 @@ group_op* parse_group(it& first, it last,lexer lexer){
         return group_node;
     }
 
-    --first;
+    //--first;
     return nullptr;
 }
 

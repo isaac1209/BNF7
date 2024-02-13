@@ -3,8 +3,8 @@
 #include "lexer.h"
 int main() {
 
-    std::string program = "was{5}";
-    std::string input = "was Waterloo I was defeated, you won the war Waterloo promise to"
+    std::string program = "erlo{4}";
+    std::string input = "Waterloooo Io was defeated, you won the war Waterloo promise to"
                         " love you for ever more Waterloo couldn't escape if I wanted"
                         " to Waterloo knowing was my fate is I to be with you Waterloo finally"
                         " facing my Waterloo ";

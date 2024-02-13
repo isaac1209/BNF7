@@ -52,6 +52,7 @@ struct counter: op{
     counter(int c):N(c){}
 
     bool eval(it first, it last,it& ptr) override{
+        static int n = 0; // using static in order to preserve our current value when call back
         auto result = children[0]->eval(first, last,ptr);
         if(first == last){
             return false;
@@ -61,10 +62,14 @@ struct counter: op{
         }
 
         last = ptr +(N +1); // uppdate the last pointer
-        while (first != last){
-            std::cout<<*first;
-            first++;
+        if(n < 1){
+            n++;
+            while (first != last){
+                std::cout<<*first;
+                first++;
+            }
         }
+
 
         return result;
     }
@@ -78,7 +83,6 @@ struct group_op:op{ // wrong implementation
         if(result){
             return true;
         }
-
         return false;
     }
 };
@@ -97,34 +101,45 @@ struct expr_op:op{ //
 };
 
 
-struct multi: op{
+struct multi: op{   //klar
     int counter=0;
     bool eval(it first, it last,it& ptr) override{
-
+        static int n = 0; // using static in order to preserve our current value when call back
+        static std::string ord;
+        auto result = children[0]->eval(first, last,ptr);
         if(first == last){
-            std::cout<<counter<<" ";
             return false;
         }
-
-        auto result = children[0]->eval(first, last,ptr);
         if(!result){
-            return eval(first+1, last,ptr);
-        }
-        if(result){
-            counter++;
-            eval(first+1, last,ptr);
-        }
-        if(counter){
-            return true;
+            eval(++first, last,ptr);
         }
 
-        return false;
+        //last = ptr +(N +1); // uppdate the last pointer
+        while (first != ptr){
+            ord+=*first;
+            first++;
+        }
+
+            //first = ptr;
+            if(n<1){
+                n++;
+                while (first != last){
+                    if(*first == *ptr){
+                        ord+=*first;
+                        first++;
+                    }else{
+                        break;
+                    }
+                }
+                std::cout<<ord<<'\n';
+            }
+        return result;
     }
 
 
 };
 
-struct or_op:op{
+struct or_op:op{    //klar
     bool eval(it first, it last,it& ptr) override{
         auto result = children[0]->eval(first, last,ptr);
 
