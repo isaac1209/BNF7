@@ -1,6 +1,6 @@
 
 match    := expr
-expr     := group | counter | or_op  | multi | word[expr]
+expr     := group | counter | or_op  | multi | any_char | word[expr]
 group    := (expr)
 word     := char[word]
 char     := any_char | a --> z | A --> Z | digit

@@ -22,7 +22,7 @@ struct char_op:op{
 
         bool eval(it first, it last,it& ptr) override{
 
-        if(*first == ch || *first == '.'){
+        if(*first == ch || ch == '*' || ch == '.'){
             return true;
         } else{
             return false;
@@ -99,10 +99,42 @@ struct expr_op:op{ //
         return false;
     }
 };
+struct anyChar :op{
+    int steps = 0;
+    bool eval(it first, it last, it &ptr) override{
+        static int n = 0; // using static in order to preserve our current value when call back
+        auto result = children[0]->eval(first, last,ptr);
+        if(first == last){
+            return false;
+        }
+        if(!result){
+            eval(++first, last,ptr);
+        }
 
+        if(steps < 0){
+            return result;
+        }else if(steps == 0){
+            while (first <= ptr+1){
+                steps++;
+                std::cout<<*first;
+                first++;
+            }
+            return result;
+        }
+
+        last = ptr + steps;
+        while (first <= last){
+            std::cout<<*first;
+            first++;
+        }
+
+
+        return result;
+}
+};
 
 struct multi: op{   //klar
-    int counter=0;
+    bool printall=0;
     bool eval(it first, it last,it& ptr) override{
         static int n = 0; // using static in order to preserve our current value when call back
         static std::string ord;
@@ -113,18 +145,14 @@ struct multi: op{   //klar
         if(!result){
             eval(++first, last,ptr);
         }
-
-        //last = ptr +(N +1); // uppdate the last pointer
         while (first != ptr){
             ord+=*first;
             first++;
         }
-
-            //first = ptr;
             if(n<1){
                 n++;
                 while (first != last){
-                    if(*first == *ptr){
+                    if(*first == *ptr  || printall){
                         ord+=*first;
                         first++;
                     }else{
@@ -136,17 +164,15 @@ struct multi: op{   //klar
         return result;
     }
 
-
 };
+
 
 struct or_op:op{    //klar
     bool eval(it first, it last,it& ptr) override{
         auto result = children[0]->eval(first, last,ptr);
-
         if(result){
             return true;
         }
-
         return children[1]->eval(first, last,ptr);
     }
 };
@@ -163,7 +189,7 @@ struct match_op:op{
     }
 };
 
-
+expr_op* parse_expr(it& first, it last,lexer lexer);
 match_op* match(it first, it last, lexer lexer);
 or_op* orOp(it first, it last,lexer lexer);
 word* paserWord(it& first, it last,lexer lexer);
