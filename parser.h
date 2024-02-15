@@ -102,7 +102,7 @@ struct expr_op:op{ //
 struct anyChar :op{
     int steps = 0;
     bool eval(it first, it last, it &ptr) override{
-        static int n = 0; // using static in order to preserve our current value when call back
+        static int n = steps; // using static in order to preserve our current value when call back
         auto result = children[0]->eval(first, last,ptr);
         if(first == last){
             return false;
@@ -111,7 +111,7 @@ struct anyChar :op{
             eval(++first, last,ptr);
         }
 
-        if(steps < 0){
+        if(steps < 0){ // då kommer inte den här structen printa ut nånting men multi kommer göra
             return result;
         }else if(steps == 0){
             while (first <= ptr+1){
@@ -121,12 +121,22 @@ struct anyChar :op{
             }
             return result;
         }
+            // vi få den här att köras bara en gång
 
-        last = ptr + steps;
-        while (first <= last){
-            std::cout<<*first;
-            first++;
-        }
+            if(n > 0){
+                last = ptr + steps;
+                while (first <= last){
+                    std::cout<<*first;
+                    first++;
+
+                }
+                n = 0; // uppdatera n så att den här while loop ska inte köra många gånger
+            }
+
+
+
+
+
 
 
         return result;

@@ -3,15 +3,14 @@
 #include "lexer.h"
 int main() {
 
-    std::string program = "Waterlo.{4}";
-    std::string input = "Waterloo Io was defeated, you won the war Waterloo promise to"
+    std::string program = ".*";
+    std::string input = "Waterloo Io was defeated, you won the war Waterloo proomise to"
                         " love you for ever more Waterloo couldn't escape if I wanted"
                         " to Waterloo knowing was my fate is I to be with you Waterloo finally"
                         " facing my Waterloo ";
 
     lexer lexer(program.begin(),program.end());
     auto tree = match(program.begin(),program.end(),lexer);
-
     it first = input.begin();
     it last = input.end();
     it ptr  = first;

@@ -3,8 +3,6 @@
 //
 #include "parser.h"
 #include "lexer.h"
-
-
 multi* multiParser(it first, it last,lexer lexer){
     auto  word = paserWord(first,last,lexer);
     if(!word){
@@ -191,6 +189,9 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
         auto expr_node = new expr_op;
         expr_node->add(group_op);
         expr_node->add(parse_expr(first, last,lexer));
+        if(first != last){
+           paserWord(first, last, lexer);
+        }
         return expr_node;
     }
 
@@ -198,13 +199,20 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
     if(or_OP){
         auto expr_node = new expr_op;
         expr_node->add(or_OP);
+        if(first != last){
+            paserWord(first, last, lexer);
+        }
         return expr_node;
+
     }
 
     auto counting = count(first,last,lexer);
     if(counting){
         auto expr_node = new expr_op;
         expr_node->add(counting);
+        if(first != last){
+            paserWord(first, last, lexer);
+        }
         return expr_node;
     }
 
@@ -212,6 +220,9 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
     if(multiSymbol){
         auto expr_node = new expr_op;
         expr_node->add(multiSymbol);
+        if(first != last){
+            paserWord(first, last, lexer);
+        }
         return expr_node;
     }
 
@@ -219,6 +230,9 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
     if(dotSymbol){
         auto expr_node = new expr_op;
         expr_node->add(dotSymbol);
+        if(first != last){
+            paserWord(first, last, lexer);
+        }
         return expr_node;
     }
 
@@ -227,6 +241,9 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
         auto expr_node = new expr_op;
         expr_node->add(text_node);
         expr_node->add(parse_expr(first, last,lexer));
+        if(first != last){
+            paserWord(first, last, lexer);
+        }
         return expr_node;
     }
 
@@ -234,6 +251,7 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
 }
 
 match_op* match(it first, it last, lexer lexer){
+
     auto  expr_node = parse_expr(first,last,lexer);
     if(expr_node){
         auto result = new match_op;
