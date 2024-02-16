@@ -8,21 +8,30 @@
 #include <vector>
 #include "lexer.h"
 
-struct op{
-    virtual bool eval(it first, it last, it& ptr) = 0;
+struct op{ //klar
+    virtual bool eval(it& first, it last) = 0;
     void add(op* child){
         if(child)
             children.push_back(child);
     }
     std::vector<op*> children;
 };
-struct char_op:op{
+struct word : op{ // klar
+    bool eval(it& first, it last) override{
+        auto result = children[0]->eval(first, last);
+        if(children.size() > 1){
+            ++first;
+            return result && children[1]->eval(first, last);
+        }
+        return result;
+    }
+};
+struct char_op:op{ //klar
     char ch;
     char_op(char c):ch(c){ }
+        bool eval(it& first, it last) override{
 
-        bool eval(it first, it last,it& ptr) override{
-
-        if(*first == ch || ch == '*' || ch == '.'){
+        if(*first == ch || ch == '.'){
             return true;
         } else{
             return false;
@@ -31,178 +40,114 @@ struct char_op:op{
         }
 
 };
+struct anyChar :char_op{ //klar
+    anyChar(): char_op('\0'){}
+    bool eval(it& first, it last) override{
+        std::cout<<*first;
+        return true;
+    }
+};
+struct multi: op{   //klar
+    std::string myString="";
+    bool eval(it& first, it last) override{
 
-struct word : op{
-    bool eval(it first, it last,it& ptr) override{
-        auto result = children[0]->eval(first, last,ptr);
-
-        if(first != last){
-            ptr = first;
+        while ( children[0]->eval(first,last)){
+            myString+=*first;
+            if(first == last){ return true;}
+            first++;
         }
 
-        if(children.size() > 1){
-            return result && children[1]->eval(++first, last,ptr);
+        if(!myString.empty()){
+            std::cout<<myString<<std::endl;
+            return true;
         }
-        return result;
+        return false;
+    }
+
+};
+struct expr_op:op{ //   klar
+    bool eval(it& first, it last) override{
+        if(first == last)
+            return false;
+        auto result = children[0]->eval(first, last);
+        if(result){
+            return true;
+        }
+        return false;
+    }
+};
+struct subexpr:op{ //klar
+
+    bool eval(it& first, it last) override{
+        bool result=children[0]->eval(first,last);
+        if (result) return true;
+        return false;
+    }
+
+};
+struct group_op:op{ // klar
+    bool eval(it& first, it last) override{
+        if(first == last)
+            return false;
+        auto result = children[0]->eval(first, last);
+        if(result){
+            return true;
+        }
+        return false;
     }
 };
 
 struct counter: op{
     int N = 0;
     counter(int c):N(c){}
-
-    bool eval(it first, it last,it& ptr) override{
-        static int n = 0; // using static in order to preserve our current value when call back
-        auto result = children[0]->eval(first, last,ptr);
-        if(first == last){
-            return false;
-        }
-        if(!result){
-            eval(++first, last,ptr);
-        }
-
-        last = ptr +(N +1); // uppdate the last pointer
-        if(n < 1){
-            n++;
-            while (first != last){
-                std::cout<<*first;
-                first++;
+    bool eval(it& first, it last) override{
+        last = first + N;
+        while (children[0]->eval(first,last)){
+            if(first == last){
+                break;
             }
-        }
-
-
-        return result;
-    }
-};
-
-struct group_op:op{ // wrong implementation
-    bool eval(it first, it last,it& ptr) override{
-        if(first == last)
-            return false;
-        auto result = children[0]->eval(first, last,ptr);
-        if(result){
-            return true;
-        }
-        return false;
-    }
-};
-
-struct expr_op:op{ //
-    bool eval(it first, it last,it& ptr) override{
-        if(first == last)
-            return false;
-        auto result = children[0]->eval(first, last,ptr);
-        if(result){
-            return true;
-        }
-
-        return false;
-    }
-};
-struct anyChar :op{
-    int steps = 0;
-    bool eval(it first, it last, it &ptr) override{
-        static int n = steps; // using static in order to preserve our current value when call back
-        auto result = children[0]->eval(first, last,ptr);
-        if(first == last){
-            return false;
-        }
-        if(!result){
-            eval(++first, last,ptr);
-        }
-
-        if(steps < 0){ // då kommer inte den här structen printa ut nånting men multi kommer göra
-            return result;
-        }else if(steps == 0){
-            while (first <= ptr+1){
-                steps++;
-                std::cout<<*first;
-                first++;
-            }
-            return result;
-        }
-            // vi få den här att köras bara en gång
-
-            if(n > 0){
-                last = ptr + steps;
-                while (first <= last){
-                    std::cout<<*first;
-                    first++;
-
-                }
-                n = 0; // uppdatera n så att den här while loop ska inte köra många gånger
-            }
-
-
-
-
-
-
-
-        return result;
-}
-};
-
-struct multi: op{   //klar
-    bool printall=0;
-    bool eval(it first, it last,it& ptr) override{
-        static int n = 0; // using static in order to preserve our current value when call back
-        static std::string ord;
-        auto result = children[0]->eval(first, last,ptr);
-        if(first == last){
-            return false;
-        }
-        if(!result){
-            eval(++first, last,ptr);
-        }
-        while (first != ptr){
-            ord+=*first;
+            std::cout<<*first;
             first++;
         }
-            if(n<1){
-                n++;
-                while (first != last){
-                    if(*first == *ptr  || printall){
-                        ord+=*first;
-                        first++;
-                    }else{
-                        break;
-                    }
-                }
-                std::cout<<ord<<'\n';
-            }
-        return result;
-    }
 
+        return first == last;
+    }
 };
 
 
-struct or_op:op{    //klar
-    bool eval(it first, it last,it& ptr) override{
-        auto result = children[0]->eval(first, last,ptr);
+
+
+struct or_op:op{
+    bool eval(it& first, it last) override{
+        auto result = children[0]->eval(first, last);
         if(result){
             return true;
         }
-        return children[1]->eval(first, last,ptr);
+        return children[1]->eval(first, last);
     }
 };
 
+
 struct match_op:op{
-    bool eval(it first, it last,it& ptr) override{
+    bool eval(it& first, it last) override{
         if(first == last)
             return false;
-        auto result = children[0]->eval(first, last,ptr);
+        auto result = children[0]->eval(first, last);
         if(!result){
-            return eval(first + 1, last,ptr);
+            return eval(first, last);
         }
         return true;
     }
 };
 
+
+
+multi* multiParser(it& first, it last,lexer lexer);
 expr_op* parse_expr(it& first, it last,lexer lexer);
 match_op* match(it first, it last, lexer lexer);
 or_op* orOp(it first, it last,lexer lexer);
 word* paserWord(it& first, it last,lexer lexer);
-
+char_op* charOp(it first, it last,lexer lexer);
+counter* count(it& first, it last,lexer lexer);
 
 #endif //BNF7_PARSER_H

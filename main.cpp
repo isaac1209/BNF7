@@ -3,25 +3,22 @@
 #include "lexer.h"
 int main() {
 
-    std::string program = ".*";
-    std::string input = "Waterloo Io was defeated, you won the war Waterloo proomise to"
-                        " love you for ever more Waterloo couldn't escape if I wanted"
-                        " to Waterloo knowing was my fate is I to be with you Waterloo finally"
-                        " facing my Waterloo ";
-
+    std::string program = "wa{3}";
+    std::string input = "waaass ";
     lexer lexer(program.begin(),program.end());
     auto tree = match(program.begin(),program.end(),lexer);
     it first = input.begin();
     it last = input.end();
-    it ptr  = first;
 
    if(tree){
-       auto match = tree->eval(first,last,ptr);
+       auto match = tree->eval(first,last);
        if(match){
            std::cout<<" :FOUND A MATCH";
        } else{
            std::cout<<"NO MATCH FOUND";
        }
+
+
    } else std::cout<<"Wrong input";
 
 

@@ -3,48 +3,24 @@
 //
 #include "parser.h"
 #include "lexer.h"
-multi* multiParser(it first, it last,lexer lexer){
-    auto  word = paserWord(first,last,lexer);
+multi* multiParser(it &first, it last,lexer lexer){ //klar
+    auto restore=first;
+    auto  word = charOp(first,last,lexer);
     if(!word){
         return nullptr;
     }
+    first++;
     auto token = lexer.lex(first,last);
     if(token == lexer::MULT_OP){
         multi* value = new multi;
         value->add(word);
+        first++;
         return value;
     }
-
+    first=restore;
     return nullptr;
 }
-counter* count(it first, it last,lexer lexer){
-    auto myWord = paserWord(first,last,lexer);
-    if(!myWord){
-        return nullptr;
-    }
-
-    auto value = lexer.lex(first,last);
-    if(value == lexer::OPEN_BRES){
-        ++first;
-
-         value = lexer.lex(first,last);
-        if(value == lexer::DIGIT){
-            int x = *first - '0';
-            counter* counter1 = new counter(x);
-
-            value = lexer.lex(++first,last);
-            if(value == lexer::CLOSEING_BRES){
-                counter1->add(myWord);
-                return counter1;
-            }
-        }
-
-    }
-
-    return nullptr;
-}
-
-or_op* orOp(it first, it last,lexer lexer){
+or_op* orOp(it first, it last,lexer lexer){ //klar
     auto lhs = paserWord(first,last,lexer);
     if(lhs){
         auto  value = lexer.lex(first,last);
@@ -67,61 +43,21 @@ or_op* orOp(it first, it last,lexer lexer){
 
     return nullptr;
 }
-
-anyChar* any_char(it first, it last,lexer lexer){
-
-    anyChar* myChar = new anyChar;
+anyChar* any_char(it first, it last,lexer lexer){ // klar
     auto value = lexer.lex(first,last);
-    if(value == lexer::LETTER){
-        auto getWord = paserWord(first,last,lexer);
-        myChar->add(getWord);
-        // skip all spaces and chech for digit
-        if(*first == '.'){
-            first++;
-            value = lexer.lex(first,last);
-            if(value == lexer::OPEN_BRES){
-                first++;
-                // skip all spaces and chech for digit
-                int x = *first - '0';
-                myChar->steps = x;
-
-                first++;
-                // skip all spaces and chech for digit
-
-                value = lexer.lex(first,last);
-                if(value == lexer::CLOSEING_BRES){
-                    return myChar;
-                } else{return nullptr;}
-            }
-            return myChar;
-        } else{return nullptr;}
-
+    if(value == lexer::DOT){
+        return new anyChar;
     }
-
-    if(*first == '.'){
-        first++;
-        if(*first == '*'){
-            char_op* ch = new char_op(*first);
-            multi* x = new multi;
-            x->add(ch);
-            x->printall = true;
-            myChar->add(x);
-            myChar->steps = -1; // viktigt i h filen anyChar så att vi ska inte köra visa funktioner
-            return myChar;
-        }
-        first--;
-        char_op* ch = new char_op(*first);
-        myChar->add(ch);
-        return myChar;
-    }
-
     return nullptr;
-}
-char_op* charOp(it first, it last,lexer lexer){
 
+}
+char_op* charOp(it first, it last,lexer lexer){ //klar
     auto  value = lexer.lex(first,last);
-    if(value == lexer::END){
-        return nullptr;
+    auto result = any_char(first,last,lexer);
+    if(result){
+        anyChar* ch = new anyChar;
+        ch->add(result);
+        return ch;
     }
 
     if(value == lexer::LETTER || value == lexer::DIGIT || value == lexer::SPACE){
@@ -130,14 +66,37 @@ char_op* charOp(it first, it last,lexer lexer){
 
     return nullptr;
 }
+subexpr* parserSubexpr(it& first, it last,lexer lexer){ // klar
 
-word* paserWord(it& first, it last,lexer lexer){
+    auto multSymbol = multiParser(first,last,lexer);
+    if(multSymbol){
+        auto* result = new subexpr;
+        result->add(multSymbol);
+        return result;
+    }
+
+    auto countSymbol = count(first,last,lexer);
+    if(countSymbol){
+        subexpr* result = new subexpr;
+        result->add(countSymbol);
+        return result;
+    }
+
+    return nullptr;
+}
+word* paserWord(it& first, it last,lexer lexer){ //klar
+    auto extraSymbol = parserSubexpr(first,last,lexer);
+    if(extraSymbol){
+        word* results = new word;
+        results->add(extraSymbol);
+        return results;
+    }
 
     auto ch = charOp(first,last,lexer);
     if(ch){
         word* results = new word;
         results->add(ch);
-        ++first;
+        first++;
         results->add(paserWord(first, last,lexer));
         return results;
 
@@ -154,7 +113,7 @@ group_op* parse_group(it& first, it last,lexer lexer){
         space = true;
     }
     if(space)
-    value = lexer.lex(++first, last);
+        value = lexer.lex(++first, last);
 
     if(value == lexer::LEFT_PAREN){
         ++first;
@@ -178,20 +137,45 @@ group_op* parse_group(it& first, it last,lexer lexer){
         return group_node;
     }
 
-    //--first;
+    return nullptr;
+}
+
+counter* count(it& first, it last,lexer lexer){
+    auto restore = first;
+    auto  word = charOp(first,last,lexer);
+    if(!word){
+        return nullptr;
+    }
+    first++;
+    auto value = lexer.lex(first,last);
+    if(value == lexer::OPEN_BRES){
+        ++first;
+
+         value = lexer.lex(first,last);
+        if(value == lexer::DIGIT){
+            char_op* myChar = new char_op(*restore);
+            int x = *first - '0';
+            counter* counter1 = new counter(x);
+            counter1->add(myChar);
+            value = lexer.lex(++first,last);
+            if(value == lexer::CLOSEING_BRES){
+                return counter1;
+            }
+        }
+
+    }
+
+    first = restore;
     return nullptr;
 }
 
 expr_op* parse_expr(it& first, it last,lexer lexer){
-
+/*
     auto group_op = parse_group(first, last,lexer);
     if(group_op){
         auto expr_node = new expr_op;
         expr_node->add(group_op);
         expr_node->add(parse_expr(first, last,lexer));
-        if(first != last){
-           paserWord(first, last, lexer);
-        }
         return expr_node;
     }
 
@@ -199,51 +183,15 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
     if(or_OP){
         auto expr_node = new expr_op;
         expr_node->add(or_OP);
-        if(first != last){
-            paserWord(first, last, lexer);
-        }
         return expr_node;
 
-    }
-
-    auto counting = count(first,last,lexer);
-    if(counting){
-        auto expr_node = new expr_op;
-        expr_node->add(counting);
-        if(first != last){
-            paserWord(first, last, lexer);
-        }
-        return expr_node;
-    }
-
-    auto multiSymbol = multiParser(first,last,lexer);
-    if(multiSymbol){
-        auto expr_node = new expr_op;
-        expr_node->add(multiSymbol);
-        if(first != last){
-            paserWord(first, last, lexer);
-        }
-        return expr_node;
-    }
-
-    auto dotSymbol = any_char(first,last,lexer);
-    if(dotSymbol){
-        auto expr_node = new expr_op;
-        expr_node->add(dotSymbol);
-        if(first != last){
-            paserWord(first, last, lexer);
-        }
-        return expr_node;
-    }
+    }*/
 
     auto text_node = paserWord(first, last, lexer);
     if(text_node){
         auto expr_node = new expr_op;
         expr_node->add(text_node);
         expr_node->add(parse_expr(first, last,lexer));
-        if(first != last){
-            paserWord(first, last, lexer);
-        }
         return expr_node;
     }
 
@@ -257,6 +205,8 @@ match_op* match(it first, it last, lexer lexer){
         auto result = new match_op;
         result->add(expr_node);
         return result;
+
+
     }
 
     return nullptr;
