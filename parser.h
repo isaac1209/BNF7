@@ -6,6 +6,7 @@
 #define BNF7_PARSER_H
 #include <iostream>
 #include <vector>
+#include <iomanip>
 #include "lexer.h"
 
 struct op{ //klar
@@ -15,29 +16,46 @@ struct op{ //klar
             children.push_back(child);
     }
     std::vector<op*> children;
+
+    virtual std::string id()=0;
+    void print(int indent=0) {
+        std::cout << std::setw(indent) << " " << id() << "\n";
+        for (auto child: children) {
+            child->print(indent + 4);
+        }
+    }
 };
 struct word : op{ // klar
     bool eval(it& first, it last) override{
         auto result = children[0]->eval(first, last);
         if(children.size() > 1){
-            ++first;
             return result && children[1]->eval(first, last);
         }
         return result;
     }
+    std::string id() override{
+        return "word";
+    }
+
 };
 struct char_op:op{ //klar
     char ch;
     char_op(char c):ch(c){ }
-        bool eval(it& first, it last) override{
+    bool eval(it& first, it last) override{
 
         if(*first == ch || ch == '.'){
+            std::cout<<*first;
+            first++;
             return true;
         } else{
+            first++;
             return false;
         }
 
-        }
+    }
+    std::string id() override{
+        return "char_op";
+    }
 
 };
 struct anyChar :char_op{ //klar
@@ -45,6 +63,9 @@ struct anyChar :char_op{ //klar
     bool eval(it& first, it last) override{
         std::cout<<*first;
         return true;
+    }
+    std::string id() override{
+        return "anyChar";
     }
 };
 struct multi: op{   //klar
@@ -58,10 +79,12 @@ struct multi: op{   //klar
         }
 
         if(!myString.empty()){
-            std::cout<<myString<<std::endl;
             return true;
         }
         return false;
+    }
+    std::string id() override{
+        return "multi";
     }
 
 };
@@ -75,6 +98,9 @@ struct expr_op:op{ //   klar
         }
         return false;
     }
+    std::string id() override{
+        return "expr_op";
+    }
 };
 struct subexpr:op{ //klar
 
@@ -82,6 +108,9 @@ struct subexpr:op{ //klar
         bool result=children[0]->eval(first,last);
         if (result) return true;
         return false;
+    }
+    std::string id() override{
+        return "subexpr";
     }
 
 };
@@ -95,48 +124,54 @@ struct group_op:op{ // klar
         }
         return false;
     }
-};
-
-struct counter: op{
-    int N = 0;
-    counter(int c):N(c){}
-    bool eval(it& first, it last) override{
-        last = first + N;
-        while (children[0]->eval(first,last)){
-            if(first == last){
-                break;
-            }
-            std::cout<<*first;
-            first++;
-        }
-
-        return first == last;
+    std::string id() override{
+        return "group_op";
     }
 };
+struct counter: op{ //klar
+    int N = 0;
+    std::string myString;
+    counter(int c):N(c){}
+    bool eval(it& first, it last) override {
+        last = first + N;
+        while (children[0]->eval(first, last)) {
+            if (first == last) {
+                break;
+            }
+        }
+            return first == last;
 
-
-
-
+    }
+    std::string id() override{
+        return "counter";
+    }
+};
 struct or_op:op{
     bool eval(it& first, it last) override{
+        auto temp=first;
         auto result = children[0]->eval(first, last);
         if(result){
             return true;
         }
-        return children[1]->eval(first, last);
+        return children[1]->eval(temp, last);
+    }
+    std::string id() override{
+        return "or_op";
     }
 };
-
-
 struct match_op:op{
     bool eval(it& first, it last) override{
-        if(first == last)
+        if(first == last) {
             return false;
+        }
         auto result = children[0]->eval(first, last);
         if(!result){
             return eval(first, last);
         }
         return true;
+    }
+    std::string id() override{
+        return "match_op";
     }
 };
 

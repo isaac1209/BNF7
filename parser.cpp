@@ -170,7 +170,7 @@ counter* count(it& first, it last,lexer lexer){
 }
 
 expr_op* parse_expr(it& first, it last,lexer lexer){
-/*
+
     auto group_op = parse_group(first, last,lexer);
     if(group_op){
         auto expr_node = new expr_op;
@@ -185,7 +185,8 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
         expr_node->add(or_OP);
         return expr_node;
 
-    }*/
+    }
+
 
     auto text_node = paserWord(first, last, lexer);
     if(text_node){
