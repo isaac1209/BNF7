@@ -54,7 +54,9 @@ struct char_op:op{ //klar
 
     }
     std::string id() override{
-        return "char_op";
+        std::cout<<"char_op => ";
+        std::cout<<ch;
+        return  " ";
     }
 
 };
@@ -133,7 +135,7 @@ struct counter: op{ //klar
     std::string myString;
     counter(int c):N(c){}
     bool eval(it& first, it last) override {
-        last = first + N;
+        last = first + N;   // update the position of the last pointer
         while (children[0]->eval(first, last)) {
             if (first == last) {
                 break;
@@ -174,8 +176,6 @@ struct match_op:op{
         return "match_op";
     }
 };
-
-
 
 multi* multiParser(it& first, it last,lexer lexer);
 expr_op* parse_expr(it& first, it last,lexer lexer);

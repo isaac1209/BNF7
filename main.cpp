@@ -3,8 +3,8 @@
 #include "lexer.h"
 int main() {
 
-    std::string program = "knowin*";
-    std::string input = "knowinnng";
+    std::string program = "(xxx +loo)";
+    std::string input = " waterloo knowinnng ";
     lexer lexer(program.begin(),program.end());
     auto tree = match(program.begin(),program.end(),lexer);
     it first = input.begin();
@@ -13,13 +13,13 @@ int main() {
    if(tree){
        auto match = tree->eval(first,last);
        if(match){
-           std::cout<<" :FOUND A MATCH \n";
+           std::cout<<" :FOUND A MATCH \n\n";
+           tree->print();
        } else{
            std::cout<<"NO MATCH FOUND \n";
        }
    } else std::cout<<"Wrong input";
 
-    tree->print();
 
 
     return 0;
