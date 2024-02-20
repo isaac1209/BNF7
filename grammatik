@@ -2,10 +2,10 @@
 match    := expr
 expr     := (group | or_op  | word)
 group    := (expr)[<expr>]
-word     := subexpr | char[word] | char [<expr>]
+word     := subexpr | char[word] | char
 subexpr  := char* | char<counter>
 char     := any_char | a --> z | A --> Z | digit
-counter  := {digit}
+counter  := {digit} [<expr>]
 any_char := .
 digit    := 0->9[digit]
 or_op    := word + word

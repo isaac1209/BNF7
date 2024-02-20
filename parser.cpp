@@ -14,7 +14,7 @@ multi* multiParser(it &first, it last,lexer lexer){ //klar
     if(token == lexer::MULT_OP){
         multi* value = new multi;
         value->add(word);
-        value->add(parse_expr(++first,last,lexer));
+        value->add(parse_expr(++first,last,lexer)); // New add
         return value;
     }
     first=restore;
@@ -123,9 +123,7 @@ group_op* parse_group(it& first, it last,lexer lexer){
             return nullptr;
 
         while (*first != ')'){
-
             if(first == last) break;
-
             first++;
         }
         value = lexer.lex(first, last);
@@ -135,7 +133,7 @@ group_op* parse_group(it& first, it last,lexer lexer){
 
         auto group_node = new group_op;
         group_node->add(text_node);
-        group_node->add(parse_expr(++first, last,lexer));
+        group_node->add(parse_expr(++first, last,lexer));   // New add
         return group_node;
     }
     first = restor;
@@ -161,7 +159,7 @@ counter* count(it& first, it last,lexer lexer){
             counter1->add(myChar);
             value = lexer.lex(++first,last);
             if(value == lexer::CLOSEING_BRES){
-                counter1->add(parse_expr(++first,last,lexer));
+                counter1->add(parse_expr(++first,last,lexer)); // New add
                 return counter1;
             }
         }
@@ -202,7 +200,6 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
 }
 
 match_op* match(it first, it last, lexer lexer){
-
     auto  expr_node = parse_expr(first,last,lexer);
     if(expr_node){
         auto result = new match_op;

@@ -74,7 +74,6 @@ struct multi: op{   //klar
     bool status = false;
     bool eval(it& first, it last) override{
         auto temp=first;
-
         while ( children[0]->eval(first,last)){
             if(first == last){ return true;}
             status = true;
@@ -123,20 +122,12 @@ struct group_op:op{ // klar
         auto temp = first;
         if(first == last)
             return false;
-        auto result = children[0]->eval(first, last);
-      /*  if(result){
-            return true;
-        }*/
 
-        //while (!children[1]->eval(first, last)){} // works well
+        while (!children[0]->eval(first,last)){}
 
-        if(children.size() > 1){
+        while (!children[1]->eval(temp, last)){} // works well
 
-            return result && children[1]->eval(temp, last);
-            //while (!children[1]->eval(first, last) && first!=last){}
-
-        }
-        return result;
+        return true;
     }
     std::string id() override{
         return "group_op";
@@ -144,7 +135,6 @@ struct group_op:op{ // klar
 };
 struct counter: op{ //klar
     int N = 0;
-    std::string myString;
     counter(int c):N(c){}
     bool eval(it& first, it last) override {
         last = first + N;   // update the position of the last pointer
