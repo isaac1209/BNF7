@@ -14,11 +14,19 @@ multi* multiParser(it &first, it last,lexer lexer){ //klar
     if(token == lexer::MULT_OP){
         multi* value = new multi;
         value->add(word);
-        first++;
+        value->add(parse_expr(++first,last,lexer));
         return value;
     }
     first=restore;
     return nullptr;
+}
+anyChar* any_char(it first, it last,lexer lexer){ // klar
+    auto value = lexer.lex(first,last);
+    if(value == lexer::DOT){
+        return new anyChar;
+    }
+    return nullptr;
+
 }
 or_op* orOp(it first, it last,lexer lexer){ //klar
     auto lhs = paserWord(first,last,lexer);
@@ -42,14 +50,6 @@ or_op* orOp(it first, it last,lexer lexer){ //klar
     }
 
     return nullptr;
-}
-anyChar* any_char(it first, it last,lexer lexer){ // klar
-    auto value = lexer.lex(first,last);
-    if(value == lexer::DOT){
-        return new anyChar;
-    }
-    return nullptr;
-
 }
 char_op* charOp(it first, it last,lexer lexer){ //klar
     auto  value = lexer.lex(first,last);
@@ -105,6 +105,7 @@ word* paserWord(it& first, it last,lexer lexer){ //klar
     return nullptr;
 }
 group_op* parse_group(it& first, it last,lexer lexer){
+    auto restor = first;
     auto value = lexer.lex(first, last);
     bool space = false;
     while (value == lexer::SPACE){
@@ -134,9 +135,10 @@ group_op* parse_group(it& first, it last,lexer lexer){
 
         auto group_node = new group_op;
         group_node->add(text_node);
+        group_node->add(parse_expr(++first, last,lexer));
         return group_node;
     }
-
+    first = restor;
     return nullptr;
 }
 
@@ -159,6 +161,7 @@ counter* count(it& first, it last,lexer lexer){
             counter1->add(myChar);
             value = lexer.lex(++first,last);
             if(value == lexer::CLOSEING_BRES){
+                counter1->add(parse_expr(++first,last,lexer));
                 return counter1;
             }
         }
@@ -175,7 +178,6 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
     if(group_op){
         auto expr_node = new expr_op;
         expr_node->add(group_op);
-        expr_node->add(parse_expr(first, last,lexer));
         return expr_node;
     }
 

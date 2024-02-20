@@ -71,16 +71,18 @@ struct anyChar :char_op{ //klar
     }
 };
 struct multi: op{   //klar
-    std::string myString="";
+    bool status = false;
     bool eval(it& first, it last) override{
+        auto temp=first;
 
         while ( children[0]->eval(first,last)){
-            myString+=*first;
             if(first == last){ return true;}
-            first++;
+            status = true;
         }
-
-        if(!myString.empty()){
+        if(children.size()>1) {
+            while (!children[1]->eval(temp, last)) {} // works well
+             }
+        if(status){
             return true;
         }
         return false;
@@ -118,13 +120,23 @@ struct subexpr:op{ //klar
 };
 struct group_op:op{ // klar
     bool eval(it& first, it last) override{
+        auto temp = first;
         if(first == last)
             return false;
         auto result = children[0]->eval(first, last);
-        if(result){
+      /*  if(result){
             return true;
+        }*/
+
+        //while (!children[1]->eval(first, last)){} // works well
+
+        if(children.size() > 1){
+
+            return result && children[1]->eval(temp, last);
+            //while (!children[1]->eval(first, last) && first!=last){}
+
         }
-        return false;
+        return result;
     }
     std::string id() override{
         return "group_op";
