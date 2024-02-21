@@ -38,6 +38,23 @@ struct word : op{ // klar
     }
 
 };
+struct output_op: op{
+    int N = 0;
+    output_op(int value):N(value){}
+    bool eval(it &first, it last) override{
+        if(children.size() > 0){
+        auto result = children[0]->eval(first,last);
+            return result;
+        }
+
+
+
+        return false;
+    }
+     std::string id() override{
+         return "output_op";
+    }
+};
 struct char_op:op{ //klar
     char ch;
     char_op(char c):ch(c){ }

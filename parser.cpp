@@ -170,6 +170,37 @@ counter* count(it& first, it last,lexer lexer){ //klar
     return nullptr;
 }
 
+output_op* outputOp(it& first, it last,lexer lexer){
+    auto restor = first;
+    auto value = lexer.lex(first,last);
+    if(value == lexer::BACK_SLASH){
+        first++;
+        if(*first == 'O'){
+            value = lexer.lex(++first,last);
+            if( value == lexer::OPEN_BRES ){
+                first++;
+                value = lexer.lex(first,last);
+                if(value == lexer::DIGIT){
+                    auto x = *first -'0';
+                    output_op* outOP = new output_op(x);
+                    first++;
+                    value = lexer.lex(first,last);
+                    if(value == lexer::CLOSEING_BRES){
+                        outOP->add(parse_expr(++first,last,lexer));
+                        return outOP;
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+    first = restor;
+    return nullptr;
+}
+
 expr_op* parse_expr(it& first, it last,lexer lexer){
 
     auto group_op = parse_group(first, last,lexer);
@@ -184,6 +215,17 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
         auto expr_node = new expr_op;
         expr_node->add(or_OP);
         return expr_node;
+
+    }
+
+    auto out = outputOp(first,last,lexer);
+    if(out){
+        if(group_op){
+            auto expr_node = new expr_op;
+            expr_node->add(out);
+            //expr_node->add(parse_expr(first, last,lexer));
+            return expr_node;
+        }
 
     }
 
