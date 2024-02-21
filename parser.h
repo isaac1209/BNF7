@@ -42,7 +42,7 @@ struct char_op:op{ //klar
     char ch;
     char_op(char c):ch(c){ }
     bool eval(it& first, it last) override{
-
+        if(first == last){return false;}
         if(*first == ch || ch == '.'){
             std::cout<<*first;
             first++;
@@ -73,18 +73,14 @@ struct anyChar :char_op{ //klar
 struct multi: op{   //klar
     bool status = false;
     bool eval(it& first, it last) override{
-        auto temp=first;
-        while ( children[0]->eval(first,last)){
-            if(first == last){ return true;}
-            status = true;
+        auto temp = first;
+        if(first == last) {
+            return false;
         }
-        if(children.size()>1) {
-            while (!children[1]->eval(temp, last)) {} // works well
-             }
-        if(status){
-            return true;
-        }
-        return false;
+        while (children[0]->eval(first,last)){ status = true;} // här hämtar vi mer av sista char
+        if(children.size() > 1)
+            while (!children[1]->eval(temp, last)){}
+        return status;
     }
     std::string id() override{
         return "multi";
@@ -93,8 +89,7 @@ struct multi: op{   //klar
 };
 struct expr_op:op{ //   klar
     bool eval(it& first, it last) override{
-        if(first == last)
-            return false;
+        if(first == last){return false;}
         auto result = children[0]->eval(first, last);
         if(result){
             return true;
@@ -120,12 +115,14 @@ struct subexpr:op{ //klar
 struct group_op:op{ // klar
     bool eval(it& first, it last) override{
         auto temp = first;
-        if(first == last)
+        if(first == last) {
             return false;
+        }
         while (!children[0]->eval(first,last)){}
         if(children.size() > 1)
-        while (!children[1]->eval(temp, last)){} // works well
-
+        while (!children[1]->eval(temp, last)){if(temp == last) {
+                break;
+        }} // works well
         return true;
     }
     std::string id() override{
@@ -136,8 +133,8 @@ struct counter: op{ //klar
     int N = 0;
     counter(int c):N(c){}
     bool eval(it& first, it last) override {
-        last = first + N;   // update the position of the last pointer
-        while (children[0]->eval(first, last)) {
+        auto temp_last = first + N;   // update the position of the last pointer
+        while (children[0]->eval(first, temp_last)) {
             if (first == last) {
                 break;
             }

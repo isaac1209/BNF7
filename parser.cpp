@@ -14,7 +14,7 @@ multi* multiParser(it &first, it last,lexer lexer){ //klar
     if(token == lexer::MULT_OP){
         multi* value = new multi;
         value->add(word);
-        value->add(parse_expr(++first,last,lexer)); // New add
+        value->add(parse_expr(++first,last,lexer)); // valfri anrop för att kolla om det finns mer att läsa in
         return value;
     }
     first=restore;
@@ -133,7 +133,7 @@ group_op* parse_group(it& first, it last,lexer lexer){ //klar
 
         auto group_node = new group_op;
         group_node->add(text_node);
-        group_node->add(parse_expr(++first, last,lexer));   // New add
+        group_node->add(parse_expr(++first, last,lexer));   // valfri anrop för att kolla om det finns mer att läsa in
         return group_node;
     }
     first = restor;
@@ -159,7 +159,7 @@ counter* count(it& first, it last,lexer lexer){ //klar
             counter1->add(myChar);
             value = lexer.lex(++first,last);
             if(value == lexer::CLOSEING_BRES){
-                counter1->add(parse_expr(++first,last,lexer)); // New add
+                counter1->add(parse_expr(++first,last,lexer)); // valfri anrop för att kolla om det finns mer att läsa in
                 return counter1;
             }
         }
@@ -186,7 +186,6 @@ expr_op* parse_expr(it& first, it last,lexer lexer){
         return expr_node;
 
     }
-
 
     auto text_node = paserWord(first, last, lexer);
     if(text_node){
