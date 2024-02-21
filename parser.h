@@ -122,9 +122,8 @@ struct group_op:op{ // klar
         auto temp = first;
         if(first == last)
             return false;
-
         while (!children[0]->eval(first,last)){}
-
+        if(children.size() > 1)
         while (!children[1]->eval(temp, last)){} // works well
 
         return true;

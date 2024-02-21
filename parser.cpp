@@ -104,7 +104,7 @@ word* paserWord(it& first, it last,lexer lexer){ //klar
 
     return nullptr;
 }
-group_op* parse_group(it& first, it last,lexer lexer){
+group_op* parse_group(it& first, it last,lexer lexer){ //klar
     auto restor = first;
     auto value = lexer.lex(first, last);
     bool space = false;
@@ -140,7 +140,7 @@ group_op* parse_group(it& first, it last,lexer lexer){
     return nullptr;
 }
 
-counter* count(it& first, it last,lexer lexer){
+counter* count(it& first, it last,lexer lexer){ //klar
     auto restore = first;
     auto  word = charOp(first,last,lexer);
     if(!word){

@@ -3,7 +3,7 @@
 #include "lexer.h"
 int main() {
 
-    std::string program = "(coo + ddd) knowin{3}";
+    std::string program = "(co*) ddd";
     std::string input = "waterloooo coo ddd knowinnng couldn't";
     lexer lexer(program.begin(),program.end());
     auto tree = match(program.begin(),program.end(),lexer);
